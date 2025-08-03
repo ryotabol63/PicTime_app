@@ -1,0 +1,16 @@
+# Java
+/target/
+*.class
+*.jar
+*.war
+*.iml
+/.idea/
+/.vscode/
+.DS_Store
+
+# Gradle
+/build/
+.gradle/
+
+# Maven
+.mvn/
