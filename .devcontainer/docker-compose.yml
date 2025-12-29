@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  workspace:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ..:/workspace:cached
+    depends_on:
+      - mssql
+    environment:
+      - MAVEN_OPTS=-Xmx1g
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+    networks:
+      - devnet
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssqldata:/var/opt/mssql
+    networks:
+      - devnet
+
+volumes:
+  mssqldata:
+
+networks:
+  devnet:
+    driver: bridge

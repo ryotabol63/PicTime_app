@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-PicTimeAppApplication<pictime-backend>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.pictime.PicTimeAppApplication",
+            "projectName": "pictime-backend",
+            "args": "--spring.profiles.active=local",
+            "vmArgs": "-Dspring.profiles.active=local",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "local"
+            }
+        },
+        {
+            "type": "java",
+            "name": "Launch Spring Boot (local profile)",
+            "request": "launch",
+            "mainClass": "com.example.pictime.PicTimeAppApplication",
+            "cwd": "${workspaceFolder}/backend",
+            "vmArgs": "-Dspring.profiles.active=local",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "local"
+            }
+        }
+    ]
+}

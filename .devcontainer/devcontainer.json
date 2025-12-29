@@ -1,0 +1,42 @@
+{
+  "name": "PicTime Dev Container",
+  "dockerComposeFile": ["docker-compose.yml"],
+  "service": "workspace",
+  "runServices": ["mssql"],
+  "workspaceFolder": "/workspace/backend",
+  "shutdownAction": "stopCompose",
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  },
+  "onCreateCommand": "echo 'Ensure Codespaces secrets MSSQL_SA_PASSWORD and PCT901S_USER_PASSWORD are set'",
+  "extensions": [
+    "vscjava.vscode-java-pack",
+    "redhat.vscode-yaml",
+    "ms-azuretools.vscode-docker"
+  ],
+  "postCreateCommand": "chmod +x .devcontainer/init-db.sh && .devcontainer/init-db.sh",
+  "remoteUser": "vscode",
+  "forwardPorts": [1433],
+  "portsAttributes": {
+    "1433": {
+      "label": "MSSQL",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "secrets": [
+    {
+      "id": "MSSQL_SA_PASSWORD",
+      "name": "MSSQL_SA_PASSWORD",
+      "description": "SA password for local MSSQL server (set in Codespaces secrets)"
+    },
+    {
+      "id": "PCT901S_USER_PASSWORD",
+      "name": "PCT901S_USER_PASSWORD",
+      "description": "Password for pct901s_user created by init SQL script (set in Codespaces secrets)"
+    }
+  ],
+  "containerEnv": {
+    "MSSQL_SA_PASSWORD": "${secrets:MSSQL_SA_PASSWORD}",
+    "PCT901S_USER_PASSWORD": "${secrets:PCT901S_USER_PASSWORD}"
+  }
+}
