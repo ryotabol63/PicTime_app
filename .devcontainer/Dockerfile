@@ -20,7 +20,10 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     gnupg \
     unixodbc-dev \
     procps \
-  && rm -rf /var/lib/apt/lists/*
+    sudo \
+  && rm -rf /var/lib/apt/lists/* \
+  && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} \
+  && chmod 0440 /etc/sudoers.d/${USERNAME}
 
 # Install Microsoft packages for msodbcsql and mssql-tools (use secure keyring)
 RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-archive-keyring.gpg \
