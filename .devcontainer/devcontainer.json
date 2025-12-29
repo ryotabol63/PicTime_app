@@ -1,6 +1,12 @@
 {
   "name": "PicTime Dev Container",
   "dockerComposeFile": ["docker-compose.yml"],
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "BUILDKIT_PROGRESS": "plain"
+    }
+  },
   "service": "workspace",
   "runServices": ["mssql"],
   "workspaceFolder": "/workspace/backend",
@@ -14,7 +20,9 @@
     "redhat.vscode-yaml",
     "ms-azuretools.vscode-docker"
   ],
+  "initializeCommand": "echo 'Initializing devcontainer (no destructive operations)'",
   "postCreateCommand": "chmod +x .devcontainer/check-secrets.sh .devcontainer/init-db.sh && .devcontainer/check-secrets.sh && .devcontainer/init-db.sh",
+  "postStartCommand": "sleep 5",
   "remoteUser": "vscode",
   "forwardPorts": [1433],
   "portsAttributes": {

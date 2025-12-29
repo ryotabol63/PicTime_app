@@ -7,7 +7,8 @@ services:
     volumes:
       - ..:/workspace:cached
     depends_on:
-      - mssql
+      mssql:
+        condition: service_healthy
     environment:
       - MAVEN_OPTS=-Xmx1g
       - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
@@ -23,6 +24,12 @@ services:
       - "1433:1433"
     volumes:
       - mssqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -U SA -P \"${MSSQL_SA_PASSWORD}\" -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - devnet
 

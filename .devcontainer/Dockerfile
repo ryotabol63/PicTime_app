@@ -22,9 +22,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     procps \
   && rm -rf /var/lib/apt/lists/*
 
-# Install Microsoft packages for msodbcsql and mssql-tools
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-  && curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+# Install Microsoft packages for msodbcsql and mssql-tools (use secure keyring)
+RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-archive-keyring.gpg \
+  && echo "deb [signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/ubuntu/22.04/prod jammy main" > /etc/apt/sources.list.d/microsoft-prod.list \
   && apt-get update \
   && ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools unixodbc-dev \
   && ln -s /opt/mssql-tools/bin/sqlcmd /usr/local/bin/sqlcmd \
