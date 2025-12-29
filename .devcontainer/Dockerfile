@@ -32,5 +32,8 @@ RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor
 
 ENV PATH="${PATH}:/opt/mssql-tools/bin"
 
+# Ensure workspace path exists and is owned by non-root user
+RUN mkdir -p /workspace/backend && chown -R ${USER_UID}:${USER_GID} /workspace || true
+
 USER ${USERNAME}
-WORKDIR /workspace
+WORKDIR /workspace/backend
