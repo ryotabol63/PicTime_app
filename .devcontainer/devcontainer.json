@@ -26,7 +26,7 @@
     "mhutchie.git-graph"
   ],
   "initializeCommand": "echo 'Checking environment...' && ( [ -n \"${MSSQL_SA_PASSWORD-}\" ] || echo 'WARNING: MSSQL_SA_PASSWORD not set' ) && ( [ -n \"${PCT901S_USER_PASSWORD-}\" ] || echo 'WARNING: PCT901S_USER_PASSWORD not set' )",
-  "postCreateCommand": "chmod +x .devcontainer/*.sh && .devcontainer/check-secrets.sh && .devcontainer/ensure-docker.sh && .devcontainer/start-mssql.sh && .devcontainer/init-db.sh",
+  "postCreateCommand": "cd /workspaces/PicTime_app && chmod +x .devcontainer/*.sh && .devcontainer/check-secrets.sh && .devcontainer/ensure-docker.sh && .devcontainer/start-mssql.sh && .devcontainer/init-db.sh",
   "remoteUser": "vscode",
   "forwardPorts": [1433],
   "portsAttributes": {

@@ -35,45 +35,165 @@ Codespaces で Dev Container を起動する前に、**リポジトリの Secret
 ---
 
 ## 3) Codespace / Dev Container の起動手順 ▶️
+
+### 構成について
+このプロジェクトは **Docker-in-Docker** を使用して、Codespace内でSQL Serverコンテナを起動します。
+- Codespace起動時に自動的にSQL Serverコンテナが作成・起動されます
+- SQL Serverは `localhost:1433` でアクセス可能です
+- データは永続化されません（Codespaceを削除すると消えます）
+
 ### GitHub Codespaces を使う場合
 1. GitHub リポジトリで `Code` ボタン → `Codespaces` → `Create codespace on main` をクリック
-2. 初回起動時に `.devcontainer` のビルドが始まり、`init-db.sh` が自動実行されます。
-3. 起動後、VS Code のターミナルで SQL Server / 初期化ログを確認できます。
+2. 初回起動時に:
+   - Dev Containerのビルド
+   - Docker-in-Dockerのセットアップ
+   - SQL Serverコンテナの起動 (`.devcontainer/start-mssql.sh`)
+   - データベース初期化 (`.devcontainer/init-db.sh`)
+   が自動実行されます
+3. 起動後、VS Code のターミナルで以下で確認できます:
+   ```bash
+   docker ps  # SQL Serverコンテナが動いているか確認
+   sqlcmd -S localhost -U SA -P "$MSSQL_SA_PASSWORD" -Q "SELECT name FROM sys.databases;"
+   ```
 
-### ローカル (Docker Compose) で試す場合
+### ローカル (Docker Desktop) で試す場合
 ```bash
-# リポジトリ直下で
-docker compose -f .devcontainer/docker-compose.yml up --build
+# VS Code で Dev Container として開く
+# または docker コマンドで起動:
+cd .devcontainer
+docker build -t pictime-dev .
+docker run -it --privileged \
+  -e MSSQL_SA_PASSWORD="YourPassword123" \
+  -e PCT901S_USER_PASSWORD="UserPassword123" \
+  -v "$(pwd)/..:/workspaces/PicTime_app" \
+  -p 1433:1433 -p 8080:8080 \
+  pictime-dev
 ```
-- 環境変数 `MSSQL_SA_PASSWORD` がホスト環境にある場合、自動的に注入されます。
-- 起動後、初期 SQL が実行されデータベース・テーブルが作成されます。
+- `--privileged` フラグが必要（Docker-in-Docker のため）
+- 環境変数で必須パスワードを渡してください
 
 ---
 
 ## 4) 起動後の確認例 ✅
+
+- Docker コンテナ確認
+```bash
+docker ps
+# mssql という名前のコンテナが動いているはず
+```
+
 - SQL Server が応答しているか確認
 ```bash
-# コンテナ内や Codespace 環境で
-sqlcmd -S mssql -U SA -P "$MSSQL_SA_PASSWORD" -Q "SELECT name FROM sys.databases;"
+sqlcmd -S localhost -U SA -P "$MSSQL_SA_PASSWORD" -Q "SELECT name FROM sys.databases;"
 ```
+
 - テーブル確認
 ```bash
-sqlcmd -S mssql -U SA -P "$MSSQL_SA_PASSWORD" -Q "USE pct901s; SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES;"
+sqlcmd -S localhost -U pct901s_user -P "$PCT901S_USER_PASSWORD" -d pct901s -Q "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES;"
+```
+
+- Spring Boot アプリケーションの起動
+```bash
+cd /workspaces/PicTime_app/backend
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ---
 
 ## 5) トラブルシューティング ⚠️
-- 初期化が失敗する場合: Docker コンテナのログを確認
-  - ローカル: `docker logs <mssql-container-id>`
-  - Codespace: VS Code のコンテナ出力 / ターミナルを確認
-- `init-db.sh` が `sqlcmd` を見つけられない場合は `.devcontainer/Dockerfile` に mssql-tools のインストールが正しく含まれているか確認してください。
+
+### 問題: SQL Server コンテナが起動していない
+
+**確認:**
+```bash
+docker ps -a
+```
+
+**解決:**
+```bash
+# 手動でSQL Serverを起動
+bash .devcontainer/start-mssql.sh
+
+# またはDockerコマンドで直接起動
+docker start mssql
+
+# コンテナが存在しない場合
+docker run -d --name mssql \
+  -e 'ACCEPT_EULA=Y' \
+  -e "MSSQL_SA_PASSWORD=$MSSQL_SA_PASSWORD" \
+  -e 'MSSQL_PID=Developer' \
+  -p 1433:1433 \
+  mcr.microsoft.com/mssql/server:2022-latest
+```
+
+### 問題: データベースが初期化されていない
+
+**確認:**
+```bash
+sqlcmd -S localhost -U SA -P "$MSSQL_SA_PASSWORD" -Q "SELECT name FROM sys.databases WHERE name='pct901s';"
+```
+
+**解決:**
+```bash
+# 手動で初期化を実行
+bash .devcontainer/manual-init.sh
+```
+
+### 問題: Docker-in-Docker が動作しない
+
+**症状:** `docker: command not found` または `Cannot connect to the Docker daemon`
+
+**解決:**
+1. Codespaceを再ビルド: `Cmd/Ctrl + Shift + P` → 「Dev Containers: Rebuild Container」
+2. `devcontainer.json` の `features` セクションに `docker-in-docker` が含まれているか確認
+
+### 問題: "waiting for sqlserver..." が終わらない (旧構成での問題)
+
+この問題は **Docker-in-Docker構成に変更することで解決済み** です。
+旧構成（docker-compose）では複数サービスがうまく起動しませんでしたが、
+新構成ではCodespace内でDockerコンテナを直接管理するため解決しています。
+
+### その他のトラブルシューティング
+
+- 初期化が失敗する場合: Dockerコンテナのログを確認
+  ```bash
+  docker logs mssql
+  ```
+- `init-db.sh` が `sqlcmd` を見つけられない場合は `.devcontainer/Dockerfile` に mssql-tools のインストールが正しく含まれているか確認してください
 
 ---
 
 ## 6) セキュリティ備考 🔒
-- `MSSQL_SA_PASSWORD` は必ず Git にコミットしないでください。
-- `backend/sql/V1__init_pct901s.sql` 内の `ChangeMe!123` を運用前に必ず変更してください（あるいは安全な方法で動的に扱うように改修してください）。
+- `MSSQL_SA_PASSWORD` は必ず Git にコミットしないでください
+- `PCT901S_USER_PASSWORD` も Git にコミットしないでください
+- これらはCodespaces Secretsまたは環境変数として管理してください
+- 本番環境では必ず強力なパスワードを使用してください
+
+---
+
+## 7) アーキテクチャ概要
+
+```
+GitHub Codespace
+├─ Dev Container (workspace)
+│  ├─ Java/Maven 環境
+│  ├─ sqlcmd ツール
+│  └─ Docker-in-Docker (Docker daemon)
+│     └─ SQL Server Container (mssql)
+│        └─ Database: pct901s
+│           ├─ User: SA (管理者)
+│           └─ User: pct901s_user (アプリ用)
+```
+
+**利点:**
+- ✅ 外部DBサービス不要
+- ✅ Codespace内で完結
+- ✅ 開発環境の再現性が高い
+- ✅ 起動が自動化されている
+
+**注意点:**
+- ⚠️ データは永続化されない（Codespace削除時に消える）
+- ⚠️ Dockerコンテナが追加のリソースを消費
 
 ---
 

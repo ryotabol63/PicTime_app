@@ -1,3 +1,5 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.jdt.ls.java.home": "/usr/lib/jvm/msopenjdk-25-amd64",
+    "spring-boot.ls.java.home": "/usr/lib/jvm/msopenjdk-25-amd64"
 }
