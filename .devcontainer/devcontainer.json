@@ -14,7 +14,7 @@
     "redhat.vscode-yaml",
     "ms-azuretools.vscode-docker"
   ],
-  "postCreateCommand": "chmod +x .devcontainer/init-db.sh && .devcontainer/init-db.sh",
+  "postCreateCommand": "chmod +x .devcontainer/check-secrets.sh .devcontainer/init-db.sh && .devcontainer/check-secrets.sh && .devcontainer/init-db.sh",
   "remoteUser": "vscode",
   "forwardPorts": [1433],
   "portsAttributes": {

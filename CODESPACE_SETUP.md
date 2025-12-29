@@ -16,8 +16,12 @@ Codespaces で Dev Container を起動する前に、**リポジトリの Secret
 手順:
 1. GitHub の該当リポジトリに移動
 2. `Settings` → `Secrets and variables` → `Codespaces` を開く
+   - 直接アクセス: https://github.com/ryotabol63/PicTime_app/settings/secrets/codespaces
 3. `New repository secret` をクリック
 4. Name: `MSSQL_SA_PASSWORD` 、 Value: (例) `MyPass@123` を入力して保存
+5. さらに `PCT901S_USER_PASSWORD` を追加（例: `S3cureP@ssw0rd`）
+
+> 注: Devcontainer は起動時にシークレットの有無をチェックします。シークレットがない場合は起動が停止し、ログに設定箇所の案内が表示されます。
 
 > devcontainer.json は `secrets` と `containerEnv` を使ってこのシークレットをコンテナ内に注入します。
 
