@@ -1,5 +1,5 @@
-# Dev container image with Microsoft Build of OpenJDK 25 and mssql-tools
-FROM mcr.microsoft.com/devcontainers/java:0-25
+# Dev container image with Microsoft Build of OpenJDK 25 (Ubuntu) and mssql-tools
+FROM mcr.microsoft.com/openjdk/jdk:25-ubuntu
 
 ARG USERNAME=vscode
 ARG USER_UID=1000
