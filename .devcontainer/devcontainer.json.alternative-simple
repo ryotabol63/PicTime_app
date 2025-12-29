@@ -1,37 +1,36 @@
 {
   "name": "PicTime Dev Container",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "args": {
-      "BUILDKIT_PROGRESS": "plain"
-    }
-  },
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest",
-      "enableNonRootDocker": "true"
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "25",
+      "installMaven": "true"
     }
   },
+  "runServices": [],
   "workspaceFolder": "/workspaces/PicTime_app",
-  "shutdownAction": "none",
+  "shutdownAction": "stopCompose",
   "settings": {
     "terminal.integrated.defaultProfile.linux": "bash"
   },
-  "onCreateCommand": "echo 'Ensure Codespaces secrets MSSQL_SA_PASSWORD and PCT901S_USER_PASSWORD are set'",
+  "onCreateCommand": "echo 'Dev container created'",
   "extensions": [
     "vscjava.vscode-java-pack",
     "redhat.vscode-yaml",
-    "ms-azuretools.vscode-docker",
-    "vscjava.vscode-spring-boot-dashboard",
-    "mhutchie.git-graph"
+    "ms-azuretools.vscode-docker"
   ],
   "initializeCommand": "echo 'Checking environment...' && ( [ -n \"${MSSQL_SA_PASSWORD-}\" ] || echo 'WARNING: MSSQL_SA_PASSWORD not set' ) && ( [ -n \"${PCT901S_USER_PASSWORD-}\" ] || echo 'WARNING: PCT901S_USER_PASSWORD not set' )",
-  "postCreateCommand": "chmod +x .devcontainer/*.sh && .devcontainer/check-secrets.sh && .devcontainer/ensure-docker.sh && .devcontainer/start-mssql.sh && .devcontainer/init-db.sh",
+  "postCreateCommand": "chmod +x .devcontainer/check-secrets.sh .devcontainer/setup-local-mssql.sh && .devcontainer/check-secrets.sh && .devcontainer/setup-local-mssql.sh",
+  "postStartCommand": "echo 'Container started'",
   "remoteUser": "vscode",
-  "forwardPorts": [1433],
+  "forwardPorts": [1433, 8080],
   "portsAttributes": {
     "1433": {
       "label": "MSSQL",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Spring Boot",
       "onAutoForward": "openBrowser"
     }
   },
@@ -48,7 +47,10 @@
     }
   ],
   "containerEnv": {
-    "MSSQL_SA_PASSWORD": "${secrets:MSSQL_SA_PASSWORD}",
-    "PCT901S_USER_PASSWORD": "${secrets:PCT901S_USER_PASSWORD}"
+    "MSSQL_SA_PASSWORD": "${localEnv:MSSQL_SA_PASSWORD}${localEnv:CODESPACE_MSSQL_SA_PASSWORD}",
+    "PCT901S_USER_PASSWORD": "${localEnv:PCT901S_USER_PASSWORD}${localEnv:CODESPACE_PCT901S_USER_PASSWORD}"
+  },
+  "remoteEnv": {
+    "MSSQL_HOST": "host.docker.internal"
   }
 }
